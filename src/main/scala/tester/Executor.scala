@@ -3,6 +3,7 @@ package tester
 import akka.actor.{ActorRef, Props}
 
 import scala.concurrent.Future
+import scala.util.Failure
 
 object Executor {
 
@@ -15,8 +16,8 @@ class Executor(val dbConnection: ActorRef, val dbName: String, query: (DbContext
 
   override def receive: Receive = {
     case DbContext.ExecuteQuery ⇒
-      query(this).onComplete {
-        case _ ⇒ context.system.terminate()
+      query(this).andThen {
+        case Failure(e) ⇒ Console.err.println(e)
       }
   }
 }
